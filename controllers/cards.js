@@ -3,9 +3,14 @@ const Card = require('../models/card');
 
 
 module.exports.getCards = (req, res) => {
-  Card.find({})
+  Card.find({}).orFail()
     .then(cards => res.send(cards))
-    .catch(err => res.status(500).send({ message: 'Error en el servidor', error: err }));
+    .catch(err => {
+      if (err.name === 'DocumentNotFoundError') {
+        return res.status(404).send({ message: 'No se encontraron tarjetas' });
+      }
+      res.status(500).send({ message: 'Error en el servidor', error: err })
+    });
 };
 
 module.exports.createCard = (req, res) => {
